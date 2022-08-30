@@ -4,7 +4,7 @@ Nexus router
 ## Installation
 
 ```bash
-go install github.com/lajosbencz/nexus-simple-router
+go install github.com/lajosbencz/nexus-simple-router@latest
 ```
 
 ## Flags
