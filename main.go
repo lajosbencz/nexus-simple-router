@@ -25,10 +25,10 @@ var (
 
 func main() {
 
-	flag.StringVar(&realm, "realm", "default", "Realm to join")
+	flag.StringVar(&realm, "realm", "default", "Realm to be created")
 	flag.StringVar(&wsHost, "host", "localhost", "Host to listen on")
 	flag.IntVar(&wsPort, "port", 8951, "Port to listen on")
-	flag.BoolVar(&devEcho, "decho", true, "Should register dev.echo RPC")
+	flag.BoolVar(&devEcho, "decho", true, "Should dev.echo RPC be registered")
 	flag.Parse()
 	wsAddr := fmt.Sprintf("%s:%d", wsHost, wsPort)
 
