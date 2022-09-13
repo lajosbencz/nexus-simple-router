@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -25,7 +26,8 @@ var (
 	rsProto     = "tcp"
 	localClient *client.Client
 	logger      *log.Logger
-	devEcho     = true
+	devEcho     = false
+	devTime     = false
 )
 
 func main() {
@@ -38,7 +40,8 @@ func main() {
 	flag.StringVar(&rsHost, "rs-host", "localhost", "RawSocket host to listen on")
 	flag.IntVar(&rsPort, "rs-port", 8952, "RawSocket port to listen on")
 	flag.StringVar(&rsProto, "rs-proto", "tcp", "RawSocket protocol (tcp,tcp4,tcp6,unix,unixpacket)")
-	flag.BoolVar(&devEcho, "decho", true, "Should dev.echo RPC be registered")
+	flag.BoolVar(&devEcho, "decho", devEcho, "Should dev.echo RPC be registered")
+	flag.BoolVar(&devTime, "dtime", devTime, "Should the time be regularly published on dev.time")
 	flag.Parse()
 
 	if !wsEnable && !rsEnable {
@@ -79,6 +82,9 @@ func main() {
 	if wsEnable {
 		wsServer := router.NewWebsocketServer(wsRouter)
 		wsServer.Upgrader.EnableCompression = true
+		wsServer.Upgrader.CheckOrigin = func(res *http.Request) bool {
+			return true
+		}
 		wsServer.EnableTrackingCookie = true
 		wsServer.KeepAlive = 30 * time.Second
 		wsCloser, err := wsServer.ListenAndServe(wsAddr)
@@ -103,14 +109,35 @@ func main() {
 	if devEcho {
 		err = createLocalCallee(localClient, "dev.echo", func(ctx context.Context, inv *wamp.Invocation) client.InvokeResult {
 			time.Sleep(2 * time.Second)
-			return client.InvokeResult{
+			res := client.InvokeResult{
 				Args:   inv.Arguments,
 				Kwargs: inv.ArgumentsKw,
 			}
+			fmt.Printf("dev.echo %v %v\n", res, inv.Details)
+			return res
 		})
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	if devTime {
+		ticker := time.NewTicker(time.Second * 5)
+		tickerQuit := make(chan struct{})
+		go func() {
+			for {
+				select {
+				case <-ticker.C:
+					now := time.Now()
+					nowStr := now.Format(time.RFC3339)
+					logger.Printf("dev.time: %s\n", nowStr)
+					localClient.Publish("dev.time", wamp.Dict{}, wamp.List{nowStr}, wamp.Dict{})
+				case <-tickerQuit:
+					ticker.Stop()
+					return
+				}
+			}
+		}()
 	}
 
 	shutdown := make(chan os.Signal, 1)
