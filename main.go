@@ -18,7 +18,7 @@ import (
 var (
 	realm       = "default"
 	wsEnable    = true
-	wsHost      = "0.0.0.0"
+	wsHost      = "localhost"
 	wsPort      = 8951
 	rsEnable    = true
 	rsHost      = "127.0.0.1"
@@ -32,14 +32,14 @@ var (
 
 func main() {
 
-	flag.StringVar(&realm, "realm", "default", "Realm to be created")
-	flag.BoolVar(&wsEnable, "ws", true, "Should WebSocket transport be started")
-	flag.StringVar(&wsHost, "ws-host", "localhost", "WebSocket host to listen on")
-	flag.IntVar(&wsPort, "ws-port", 8951, "WebSocket port to listen on")
-	flag.BoolVar(&rsEnable, "rs", true, "Should RawSocket transport be started")
-	flag.StringVar(&rsHost, "rs-host", "localhost", "RawSocket host to listen on")
-	flag.IntVar(&rsPort, "rs-port", 8952, "RawSocket port to listen on")
-	flag.StringVar(&rsProto, "rs-proto", "tcp", "RawSocket protocol (tcp,tcp4,tcp6,unix,unixpacket)")
+	flag.StringVar(&realm, realm, "default", "Realm to be created")
+	flag.BoolVar(&wsEnable, "ws", wsEnable, "Should WebSocket transport be started")
+	flag.StringVar(&wsHost, "ws-host", wsHost, "WebSocket host to listen on")
+	flag.IntVar(&wsPort, "ws-port", wsPort, "WebSocket port to listen on")
+	flag.BoolVar(&rsEnable, "rs", rsEnable, "Should RawSocket transport be started")
+	flag.StringVar(&rsHost, "rs-host", rsHost, "RawSocket host to listen on")
+	flag.IntVar(&rsPort, "rs-port", rsPort, "RawSocket port to listen on")
+	flag.StringVar(&rsProto, "rs-proto", rsProto, "RawSocket protocol (tcp,tcp4,tcp6,unix,unixpacket)")
 	flag.BoolVar(&devEcho, "decho", devEcho, "Should dev.echo RPC be registered")
 	flag.BoolVar(&devTime, "dtime", devTime, "Should the time be regularly published on dev.time")
 	flag.Parse()
